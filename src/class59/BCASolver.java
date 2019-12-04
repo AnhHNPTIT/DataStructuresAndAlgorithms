@@ -12,7 +12,7 @@ package class59;
  */
 public class BCASolver {
     public static void main(String[] args) {
-        BCAModel model = new BCAModel();
+        Test model = new Test();
         model.loadData("demo.txt");
         model.solve();
 }    

@@ -12,25 +12,46 @@ import java.util.Scanner;
  *
  * @author hoang
  */
-public class BCAModel {
+public class Test {
     int m; // so giao vien
     int n; // so khoa hoc
     int z; // giao vien day it nhat z khoa hoc
-    int[] x; // giao vien x[i] day khoa hoc i
+    int[][] x; // giao vien x[i] day khoa hoc i
     boolean[][] conflict; // khoa hoc i va j xung dot 
     boolean[][] teach; // giao vien t day khoa hoc i
     int[] cnt; // dem giao vien day so khoa hoc
     int cnt_x; // dem so cach sap xep
     int[] max; // max khoa hoc duoc day boi 1 giao vien
     int f_max; // max load
-    private boolean check(int t, int i){
+    private boolean check(int t, int i, int k){
         if(!teach[t][i]) return false; // giao vien t khong day khoa hoc i
         else {
             for(int j = 1; j < i; j++){ // kiem tra truoc do giao vien co day khoa hoc j nao xung dot voi i khong
-                if(x[j] == t && conflict[j][i]){
+                if(x[k][j] == t && conflict[j][i]){
                     return false;
                 }
             }           
+        }
+        return true;
+    }
+    private boolean checkCourse(int k){
+         //khoi tao mang cnt = 0
+        for(int i=1; i<=m;i++){
+            cnt[i] = 0;
+        }
+        
+        // dem giao vien x[i] day so khoa hoc
+        for(int i=1; i<=m; i++){
+            for(int j=1; j<=n;j++){
+                if(x[k][j] == i) cnt[i]++;
+            }
+        }
+        
+        // kiem tra giao vien da day it nhat z khoa hoc chua?
+        for(int i = 1; i <= m; i++){
+            if(cnt[i] < z){
+                return false;
+            }
         }
         return true;
     }
@@ -48,17 +69,17 @@ public class BCAModel {
 //        }
 //        System.out.println();
         
-         //khoi tao mang cnt = 0
-        for(int i=1; i<=m;i++){
-            cnt[i] = 0;
-        }
-        
-        // dem giao vien x[i] day so khoa hoc
-        for(int i=1; i<=m; i++){
-            for(int j=1; j<=n;j++){
-                if(x[j] == i) cnt[i]++;
-            }
-        }
+//         //khoi tao mang cnt = 0
+//        for(int i=1; i<=m;i++){
+//            cnt[i] = 0;
+//        }
+//        
+//        // dem giao vien x[i] day so khoa hoc
+//        for(int i=1; i<=m; i++){
+//            for(int j=1; j<=n;j++){
+//                if(x[cnt_x-1][j] == i) cnt[i]++;
+//            }
+//        }
         
 //        for(int i = 1; i <= 4; i++){
 //            System.out.print(cnt[i] + " ");
@@ -72,36 +93,50 @@ public class BCAModel {
     }
     public void tryValue(int k){
         for(int v = 1; v <= m; v++){
-            if(check(v,k)){
-                x[k] = v;
+            if(check(v,k,cnt_x)){
+                x[cnt_x][k] = v;
                 if( k == n){
-                    cnt_x++;
-                    printSolution();
+                    if(checkCourse(cnt_x)){
+                        cnt_x++;
+                        printSolution();                        
+                    }
+
                 }
                 else tryValue(k+1);
             }
         }  
     }
     public void solve(){
-        x = new int[n+1];
+        x = new int[100][n+1];
         cnt_x = 0;
         cnt = new int[m+1];    
         max= new int[100];
-
+        int k = 0;
         tryValue(1);
        // tim max load
        if(cnt_x > 0){
            f_max = find_max(max, cnt_x);
            for(int i= 1; i <= cnt_x; i++){
                if(max[i] == f_max) {
-                   int k = i;
+                   k = i;
+                   break;
                }
            }
+            System.out.println("Max khoa hoc duoc day boi 1 giao vien:" + f_max);  
+            for(int j = 1; j <= m; j++){
+                System.out.print("Giao vien " + j + ": ");
+                for(int i = 1; i <= n; i++){  
+                    if(x[k-1][i] == j) System.out.print(i + " ");
+                }
+                System.out.println();
+            }
+            System.out.println("");
        }
        else {
            f_max = -1;
+           System.out.println("Max khoa hoc duoc day boi 1 giao vien:" + f_max); 
        }
-        System.out.println(f_max);  
+
     }
     public void loadData(String filename){
         try{
